@@ -1,0 +1,44 @@
+version: 0.2
+env:
+  secrets-manager:
+    DOCKERHUB_PASS: "arn:aws:secretsmanager:us-east-1:736845954960:secret:docker-HSx2sz:password"
+    DOCKERHUB_USERNAME: "arn:aws:secretsmanager:us-east-1:736845954960:secret:docker-HSx2sz:username"
+phases:
+  pre_build:
+    commands:
+      - echo Login in to  Dokerhub
+      - docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASS
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 736845954960.dkr.ecr.us-east-1.amazonaws.com
+      - pip install -r requirements.txt
+      - pytest --cov=src -v -s --cov-fail-under=70
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...          
+      - docker build -t security_app .
+      - docker tag security_app:latest 736845954960.dkr.ecr.us-east-1.amazonaws.com/security_app:latest
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push 736845954960.dkr.ecr.us-east-1.amazonaws.com/security_app:latest
+      - echo Writing Image Definitions file...
+      - printf '[{"name":"Container-app-Security","imageUri":"736845954960.dkr.ecr.us-east-1.amazonaws.com/security_app:latest"}]' > imagedefinitions.json
+      - printf '{"ImageURI":"736845954960.dkr.ecr.us-east-1.amazonaws.com/security_app:latest"}' > imageDetail.json
+      - cat imagedefinitions.json 
+artifacts:
+  files:
+    - '**/*'
+    - imagedefinitions.json
+    - imageDetail.json
+
+  secondary-artifacts:
+    DefinitionArtifact:
+      files:
+        - appspec.yaml
+        - taskdef.json
+    ImageArtifact:
+      files:
+        - imageDetail.json
+
