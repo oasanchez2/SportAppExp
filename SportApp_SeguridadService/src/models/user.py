@@ -18,10 +18,12 @@ class User(Model, Base):
   token = Column(String)
   expireAt = Column(DateTime)
 
-  def __init__(self, username, email, password):
+  def __init__(self, nombre, apellido, email, phone, password):
     Model.__init__(self)
-    self.username = username
+    self.nombre = nombre
+    self.apellido = apellido
     self.email = email
+    self.phone =  phone
     password = password.encode('utf-8')
     salt = bcrypt.gensalt()
     self.password = bcrypt.hashpw(password, salt).decode()
@@ -34,8 +36,10 @@ class User(Model, Base):
 
 class UserSchema(Schema):
   id = fields.Number()
-  username = fields.Str()
+  nombre = fields.Str()
+  apellido = fields.Str()
   email = fields.Str()
+  phone = fields.Str()  
   password = fields.Str()
   salt = fields.Str()
   token = fields.Str()
@@ -45,8 +49,10 @@ class UserSchema(Schema):
 
 class UserJsonSchema(Schema):
   id = fields.Number()
-  username = fields.Str()
+  nombre = fields.Str()
+  apellido = fields.Str()
   email = fields.Str()
+  phone = fields.Str() 
   token = fields.Str()
   expireAt = fields.DateTime()
   createdAt = fields.DateTime()

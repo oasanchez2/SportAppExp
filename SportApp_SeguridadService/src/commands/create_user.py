@@ -11,13 +11,13 @@ class CreateUser(BaseCommannd):
   def execute(self):
     try:
       posted_user = UserSchema(
-        only=('username', 'email', 'password','role')
+        only=('nombre', 'apellido', 'email', 'phone', 'password')
       ).load(self.data)
       print(posted_user)
       user = User(**posted_user)
       session = Session()
       
-      if self.username_exist(session, self.data['username']) or self.email_exist(session, self.data['email']):
+      if self.email_exist(session, self.data['email']):
         session.close()
         raise UserAlreadyExists()
 
@@ -31,8 +31,5 @@ class CreateUser(BaseCommannd):
     except TypeError:
       raise IncompleteParams()
   
-  def username_exist(self, session, username):
-    return len(session.query(User).filter_by(username=username).all()) > 0
-
   def email_exist(self, session, email):
     return len(session.query(User).filter_by(email=email).all()) > 0

@@ -15,11 +15,11 @@ class GenerateToken(BaseCommannd):
   def execute(self):
     session = Session()
 
-    if len(session.query(User).filter_by(username=self.username).all()) <= 0:
+    if len(session.query(User).filter_by(email=self.username).all()) <= 0:
       session.close()
       raise UserNotFoundError()
 
-    user = session.query(User).filter_by(username=self.username).one()
+    user = session.query(User).filter_by(email=self.username).one()
   
 
     if not self.valid_password(user.salt, user.password, self.password):

@@ -12,7 +12,7 @@ class SessionConfig():
     return f'postgresql://{db_config["user"]}:{db_config["password"]}@{db_config["host"]}:{db_config["port"]}/{db_config["db"]}'
 
   def config(self):
-    db_name = os.environ['DB_NAME'] if 'DB_NAME' in os.environ else 'monitor_users'
+    db_name = os.environ['DB_NAME'] if 'DB_NAME' in os.environ else 'users'
     if "ENV" in os.environ and os.environ['ENV'] == 'test':
       db_name += '_test'
 

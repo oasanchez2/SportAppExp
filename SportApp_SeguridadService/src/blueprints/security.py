@@ -3,7 +3,6 @@ from ..commands.create_user import CreateUser
 from ..commands.generate_token import GenerateToken
 from ..commands.get_user import GetUser
 from ..commands.reset import Reset
-from ..commands.update_company_id import UpdateCompanyId
 
 security_blueprint = Blueprint('users', __name__)
 
@@ -20,17 +19,6 @@ def auth():
 @security_blueprint.route('/users/me', methods = ['GET'])
 def show():
     user = GetUser(auth_token()).execute()
-    return jsonify(user)
-
-@security_blueprint.route('/update/companyID/', methods = ['POST'])
-def update():
-    data = request.get_json()
-    print(data)
-    userId= data["userId"] 
-    print(userId)
-    companyId= data ["companyId"]
-    print(companyId)
-    user = UpdateCompanyId(companyId,userId,auth_token()).execute()
     return jsonify(user)
 
 @security_blueprint.route('/', methods = ['GET'])
