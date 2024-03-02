@@ -17,3 +17,11 @@ class IncompleteParams(ApiError):
 class Unauthorized(ApiError):
     code = 401
     description = "Unauthorized"
+
+class ClientExError(ApiError):
+    code = 500
+    description = "Error"
+
+class ExeptionExError(ApiError):
+    code = 500
+    description = "Error exeption"

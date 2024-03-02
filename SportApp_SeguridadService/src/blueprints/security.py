@@ -3,6 +3,7 @@ from ..commands.create_user import CreateUser
 from ..commands.generate_token import GenerateToken
 from ..commands.get_user import GetUser
 from ..commands.reset import Reset
+from ..commands.confirm_user import ConfirmUser
 
 security_blueprint = Blueprint('users', __name__)
 
@@ -10,6 +11,11 @@ security_blueprint = Blueprint('users', __name__)
 def create():
     user = CreateUser(request.get_json()).execute()
     return jsonify(user), 201
+
+@security_blueprint.route('/users/confirm', methods = ['POST'])
+def confirm():
+    result = ConfirmUser(request.get_json()).execute()
+    return jsonify(result), 201
 
 @security_blueprint.route('/users/auth', methods = ['POST'])
 def auth():
