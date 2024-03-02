@@ -4,7 +4,7 @@ class ApiError(Exception):
 
 class UserAlreadyExists(ApiError):
     code = 412
-    description = "User with username or email already exists"
+    description = "User with username already exists"
 
 class UserNotFoundError(ApiError):
     code = 404
@@ -25,3 +25,31 @@ class ClientExError(ApiError):
 class ExeptionExError(ApiError):
     code = 500
     description = "Error exeption"
+
+class UserNotConfirmedError(ApiError):
+    code = 401
+    description = "Usuario no confirmado"
+
+class InvalidPasswordError(ApiError):
+    code = 412
+    description = "Contraseña no conforme"    
+
+class InvalidEamilError(ApiError):
+    code = 412
+    description = "Email invalido" 
+
+class ClientInvalidParameterError(ApiError):
+    code = 412
+    description = "Error de parametros"    
+
+class CodeNotExistsError(ApiError):
+    code = 412
+    description = "Codigo invalido"
+
+class CodeExpiredError(ApiError):
+    code = 412
+    description = "Codigo expiro"
+
+class GetUserNotFoundError(ApiError):
+    code = 404
+    description = "Usuario no encontrado"
