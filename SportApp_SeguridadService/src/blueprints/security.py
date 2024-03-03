@@ -5,6 +5,7 @@ from ..commands.get_user import GetUser
 from ..commands.reset import Reset
 from ..commands.confirm_user import ConfirmUser
 from ..commands.forgot_user import ForgotUser
+from ..commands.confirm_forgot_user import ConfirmForgotUser
 
 security_blueprint = Blueprint('users', __name__)
 
@@ -21,6 +22,11 @@ def confirm():
 @security_blueprint.route('/users/forgot', methods = ['POST'])
 def forgot():
     result = ForgotUser(request.get_json()).execute()
+    return jsonify(result), 201
+
+@security_blueprint.route('/users/confirm_forgot', methods = ['POST'])
+def confirm_forgot():
+    result = ConfirmForgotUser(request.get_json()).execute()
     return jsonify(result), 201
 
 @security_blueprint.route('/users/auth', methods = ['POST'])
