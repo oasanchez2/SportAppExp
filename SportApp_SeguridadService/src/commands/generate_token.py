@@ -45,15 +45,15 @@ class GenerateToken(BaseCommannd):
        if err.response['Error']['Code'] == 'NotAuthorizedException':
            raise Unauthorized
        elif err.response['Error']['Code'] == 'UserNotFoundException':
-          raise UserNotFoundError()
+          raise UserNotFoundError
        elif err.response['Error']['Code'] == 'UserNotConfirmedException':
-          raise UserNotConfirmedError()
+          raise UserNotConfirmedError
        elif err.response['Error']['Code'] == 'InvalidParameterException':
-          IncompleteParams()
+          raise IncompleteParams
        elif err.response['Error']['Code'] == 'PasswordResetRequiredException':
-          PasswordResetRequiredError()
+          raise PasswordResetRequiredError
        else:
-          ClientExError()
+          raise ClientExError
     
   def valid_password(self, salt, password, other_password):
     incoming_password = bcrypt.hashpw(
