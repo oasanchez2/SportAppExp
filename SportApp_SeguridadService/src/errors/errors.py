@@ -53,3 +53,7 @@ class CodeExpiredError(ApiError):
 class GetUserNotFoundError(ApiError):
     code = 404
     description = "Usuario no encontrado"
+
+class PasswordResetRequiredError(ApiError):
+    code = 401
+    description = "Por favor cambie su contraseña"

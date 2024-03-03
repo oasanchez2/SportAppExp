@@ -1,7 +1,7 @@
 from .base_command import BaseCommannd
 from ..models.user import User, UserJsonSchema
 from ..session import Session
-from ..errors.errors import Unauthorized, IncompleteParams, UserNotFoundError, UserNotConfirmedError, ClientExError
+from ..errors.errors import Unauthorized, IncompleteParams, UserNotFoundError, UserNotConfirmedError, ClientExError,PasswordResetRequiredError
 import bcrypt
 import boto3
 import hmac
@@ -40,19 +40,20 @@ class GenerateToken(BaseCommannd):
         # Si necesitas el token de acceso, puedes obtenerlo de la respuesta:
         # access_token = response['AuthenticationResult']['AccessToken']
         # return access_token
-    except client.exceptions.NotAuthorizedException  as e:
-        print("Not Authorized:", e)
-        raise Unauthorized()
-    except client.exceptions.UserNotFoundException:
-        raise UserNotFoundError()
-    except client.exceptions.UserNotConfirmedException:
-        raise UserNotConfirmedError()
-    except client.exceptions.InvalidParameterException as e:
-        print("Parámetro inválido:", e)
-        IncompleteParams()
-    except Exception as e:
-        print("Error al iniciar sesión:", e)
-        ClientExError()
+    except ClientError as err:       
+        print(f"Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+        if err.response['Error']['Code'] == 'NotAuthorizedException':
+           raise Unauthorized
+        elif err.response['Error']['Code'] == 'UserNotFoundException':
+           raise UserNotFoundError
+        elif err.response['Error']['Code'] == 'UserNotConfirmedException':
+           raise UserNotConfirmedError
+        elif err.response['Error']['Code'] == 'InvalidParameterException':
+           raise IncompleteParams
+        elif err.response['Error']['Code'] == 'PasswordResetRequiredException':
+           raise PasswordResetRequiredError
+        else:
+           raise ClientExError
     
   def valid_password(self, salt, password, other_password):
     incoming_password = bcrypt.hashpw(
