@@ -56,4 +56,8 @@ class GetUserNotFoundError(ApiError):
 
 class PasswordResetRequiredError(ApiError):
     code = 401
-    description = "Por favor cambie su contraseña"    
+    description = "Por favor cambie su contraseña"
+
+class LimitExceededError(ApiError):
+    code = 412
+    description = "Supero el limite de intentos. Intente mas tarde"

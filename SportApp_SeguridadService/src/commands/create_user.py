@@ -8,6 +8,7 @@ import hashlib
 import base64
 import os
 import re
+from botocore.exceptions import ClientError
 
 class CreateUser(BaseCommannd):
   def __init__(self, data):
@@ -54,16 +55,19 @@ class CreateUser(BaseCommannd):
         )
              
         new_user = UserJsonSchema().dump(posted_user)  
-        return new_user 
-      except client.exceptions.UsernameExistsException:
-          raise UserAlreadyExists
-      except client.exceptions.InvalidPasswordException:
-          raise InvalidPasswordError
-      except client.exceptions.InvalidParameterException:
-          raise ClientInvalidParameterError
-      except client.exceptions.ClientError as e:
-          print(str(e))
-          raise ClientExError
+        return new_user
+      except ClientError as err: 
+            print(f"Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
+            if err.response['Error']['Code'] == 'UsernameExistsException':
+                raise UserAlreadyExists
+            elif err.response['Error']['Code'] == 'InvalidPasswordException':
+                raise InvalidPasswordError
+            elif err.response['Error']['Code'] == 'InvalidParameterException':
+                raise ClientInvalidParameterError
+            elif err.response['Error']['Code'] == 'InvalidParameterException':
+                raise ClientInvalidParameterError
+            else:
+               raise ClientExError
       
     except TypeError as te:
       print("Error en el primer try:", str(te))
