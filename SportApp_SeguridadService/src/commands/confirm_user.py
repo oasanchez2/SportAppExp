@@ -1,7 +1,7 @@
 from .base_command import BaseCommannd
 from ..models.user import User, UserJsonSchema
 from ..session import Session
-from ..errors.errors import ExeptionExError, IncompleteParams, UserNotFoundError
+from ..errors.errors import ExeptionExError, IncompleteParams, CodeNotExistsError,CodeExpiredError
 from datetime import datetime
 import boto3
 import hmac
@@ -32,10 +32,15 @@ class ConfirmUser(BaseCommannd):
             ConfirmationCode = self.confirmation_code,            
             SecretHash= self.calculate_secret_hash(os.environ['APP_SPORTAPP'], os.environ['APP_SPORTAPPCLIENT'], self.username)
           )
-        return mnensaje     
+        return mnensaje
     except ClientError as err:       
         print(f"Couldn't confirm sign up for {self.username}. Here's why: {err.response['Error']['Code']}: {err.response['Error']['Message']}")
-        raise ExeptionExError        
+        if err.response['Error']['Code'] == 'CodeMismatchException':
+           raise CodeNotExistsError
+        elif err.response['Error']['Code'] == 'ExpiredCodeException':
+            raise CodeExpiredError
+        else:
+           raise ExeptionExError        
   
   def calculate_secret_hash(self,client_id, client_secret, username):
     msg = username + client_id
