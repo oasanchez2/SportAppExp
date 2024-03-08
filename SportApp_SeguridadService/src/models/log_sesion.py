@@ -17,7 +17,7 @@ class LogSesion(Model, Base):
     self.email = email
     self.ip_origen =  ip_origen
     self.user_agent =  user_agent
-    self.user_agent =  codigo_sesion
+    self.codigo_sesion =  codigo_sesion
     
 class LogSesionSchema(Schema):
   id = fields.Number()

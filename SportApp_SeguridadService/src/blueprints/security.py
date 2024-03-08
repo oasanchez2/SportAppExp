@@ -11,7 +11,7 @@ security_blueprint = Blueprint('users', __name__)
 
 @security_blueprint.route('/users', methods = ['POST'])
 def create():
-    user = CreateUser(request.get_json(),request.remote_addr, request.headers.get('User-Agent')).execute()
+    user = CreateUser(request.get_json()).execute()
     return jsonify(user), 201
 
 @security_blueprint.route('/users/confirm', methods = ['POST'])
@@ -31,7 +31,7 @@ def confirm_forgot():
 
 @security_blueprint.route('/users/auth', methods = ['POST'])
 def auth():
-    user = GenerateToken(request.get_json()).execute()
+    user = GenerateToken(request.get_json(),request.remote_addr, request.headers.get('User-Agent')).execute()
     return jsonify(user)
 
 @security_blueprint.route('/users/me', methods = ['GET'])

@@ -9,8 +9,8 @@ services:
     ports:
       - "3000:5000"
     environment:
-      DB_NAME: users
-      DB_HOST: databases
+      DB_NAME: postgres
+      DB_HOST: users.cb0adymbqich.us-east-1.rds.amazonaws.com
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
@@ -23,6 +23,8 @@ services:
       - all
   databases:
       build: ./data_bases
+      ports:
+        - "5432:5432"
       environment:
         POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres

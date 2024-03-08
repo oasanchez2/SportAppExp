@@ -2,7 +2,7 @@ from .base_command import BaseCommannd
 from ..models.user import User, UserJsonSchema
 from ..models.log_sesion import LogSesion
 from ..session import Session
-from ..errors.errors import Unauthorized, IncompleteParams, UserNotFoundError, UserNotConfirmedError, ClientExError, PasswordResetRequiredError
+from ..errors.errors import Unauthorized, IncompleteParams, UserNotFoundError, UserNotConfirmedError, ClientExError, PasswordResetRequiredError, ClientInvalidParameterError
 import bcrypt
 import boto3
 import hmac
@@ -16,6 +16,8 @@ class GenerateToken(BaseCommannd):
     if 'username' not in data or 'password' not in data:
       raise IncompleteParams()
 
+   # Configurar cliente de Cognito
+    self.client = boto3.client('cognito-idp', region_name='us-east-1')
     self.username = data['username']
     self.password = data['password']
     self.ip = ip
@@ -24,12 +26,9 @@ class GenerateToken(BaseCommannd):
   def execute(self):
     session = Session()
 
-    # Configurar cliente de Cognito
-    client = boto3.client('cognito-idp', region_name='us-east-1')
-
     # Definir para iniciar sesión de un usuario
     try:
-        response = client.initiate_auth(
+        response = self.client.initiate_auth(
             ClientId=os.environ['APP_SPORTAPP'],
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
@@ -98,10 +97,40 @@ class GenerateToken(BaseCommannd):
         count_not_authorized = sum(1 for resultado in resultados if resultado.codigo_sesion == 'NotAuthorizedException')
 
         if len(resultados) == count_not_authorized:
-            pass
+            self.bloquear_usuario(email)
         
      except TypeError as te:
         print("Error validar regla bloqueo:", str(te))
+   
+  def bloquear_usuario(self,email):
+      # Definir para iniciar sesión de un usuario
+      try:
+         salt = bcrypt.gensalt()
+         response = self.client.admin_set_user_password(
+               ClientId=os.environ['APP_SPORTAPP'],
+               Username= email,
+               Password= bcrypt.hashpw('T3mpor4l', salt).decode(),
+               Permanent= False
+         )
+         
+         return response
+         # Si necesitas el token de acceso, puedes obtenerlo de la respuesta:
+         # access_token = response['AuthenticationResult']['AccessToken']
+         # return access_token
+      except ClientError as err: 
+         print(f"Here's why bloquear usuario: {err.response['Error']['Code']}: {err.response['Error']['Message']}")        
+         if err.response['Error']['Code'] == 'NotAuthorizedException':
+            raise Unauthorized
+         elif err.response['Error']['Code'] == 'UserNotFoundException':
+            raise UserNotFoundError
+         elif err.response['Error']['Code'] == 'UserNotConfirmedException':
+            raise UserNotConfirmedError
+         elif err.response['Error']['Code'] == 'InvalidParameterException':
+            raise IncompleteParams
+         elif err.response['Error']['Code'] == 'InvalidParameterException':
+                raise ClientInvalidParameterError
+         else:
+            raise ClientExError
      
      
       
