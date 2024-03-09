@@ -16,6 +16,7 @@ services:
       DB_PASSWORD: postgres
       APP_SPORTAPP: 3vfra38lskvp64bddjfejhg51h
       APP_SPORTAPPCLIENT: 1b9ekhl4vnp8lvc0g182d74ekss16it9q5qc5mbqvgeft212la9t
+      APP_SPORTAAIDGRUPO: us-east-1_nxPyfwr4i
     depends_on:
       databases:
         condition: service_healthy

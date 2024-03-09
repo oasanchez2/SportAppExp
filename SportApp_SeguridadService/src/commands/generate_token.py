@@ -105,11 +105,12 @@ class GenerateToken(BaseCommannd):
   def bloquear_usuario(self,email):
       # Definir para iniciar sesión de un usuario
       try:
+         print("Entre a bloquear:")
          salt = bcrypt.gensalt()
          response = self.client.admin_set_user_password(
-               ClientId=os.environ['APP_SPORTAPP'],
+               UserPoolId=os.environ['APP_SPORTAAIDGRUPO'],
                Username= email,
-               Password= bcrypt.hashpw('T3mpor4l', salt).decode(),
+               Password= bcrypt.hashpw('T3mpor4l'.encode(), salt).decode(),
                Permanent= False
          )
          
