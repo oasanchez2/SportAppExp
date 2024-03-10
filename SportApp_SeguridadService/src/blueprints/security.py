@@ -6,6 +6,8 @@ from ..commands.reset import Reset
 from ..commands.confirm_user import ConfirmUser
 from ..commands.forgot_user import ForgotUser
 from ..commands.confirm_forgot_user import ConfirmForgotUser
+from ..commands.verify_mfa import VerifyMfa
+from ..commands.respond_to_mfa_challenge import ResponseMfaChallenge
 
 security_blueprint = Blueprint('users', __name__)
 
@@ -47,6 +49,17 @@ def ping():
 def reset():
     Reset().execute()
     return jsonify({'status': 'OK'})
+
+@security_blueprint.route('/users/verify_mfa', methods = ['POST'])
+def verify_mfa():
+    user = VerifyMfa(request.get_json()).execute()
+    return jsonify(user)
+
+@security_blueprint.route('/users/response_mfa_challenge', methods = ['POST'])
+def response_mfa_challenge():
+    user = ResponseMfaChallenge(request.get_json()).execute()
+    return jsonify(user)
+
 
 def auth_token():
     if 'Authorization' in request.headers:

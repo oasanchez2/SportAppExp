@@ -37,7 +37,19 @@ class GenerateToken(BaseCommannd):
                 'SECRET_HASH': self.calculate_secret_hash(os.environ['APP_SPORTAPP'], os.environ['APP_SPORTAPPCLIENT'], self.username)
             }
         )
-        print(response)
+        challenge_name = response.get("ChallengeName", None)
+        if challenge_name == "MFA_SETUP":
+            if (
+            "SOFTWARE_TOKEN_MFA"
+            in response["ChallengeParameters"]["MFAS_CAN_SETUP"]
+            ):
+               response.update(self.get_mfa_secret(response["Session"]))
+            else:
+               raise RuntimeError(
+                  "The user pool requires MFA setup, but the user pool is not "
+                  "configured for TOTP MFA."
+            )
+        # print(response)
         self.log_sesiones(session,self.username,self.ip,self.user_agent,'Ok')
         self.reglas_bloqueo(session, self.username)
         session.close()
@@ -88,7 +100,7 @@ class GenerateToken(BaseCommannd):
   def reglas_bloqueo(self,session, email):
      try:
         resultados = session.query(LogSesion).\
-        filter_by(email=email, codigo_sesion='NotAuthorizedException').\
+        filter_by(email=email).\
         order_by(LogSesion.createdAt.desc()).\
         limit(3).\
         all()
@@ -97,7 +109,8 @@ class GenerateToken(BaseCommannd):
         count_not_authorized = sum(1 for resultado in resultados if resultado.codigo_sesion == 'NotAuthorizedException')
 
         if len(resultados) == count_not_authorized:
-            self.bloquear_usuario(email)
+            # self.bloquear_usuario(email)
+           pass
         
      except TypeError as te:
         print("Error validar regla bloqueo:", str(te))
@@ -133,5 +146,24 @@ class GenerateToken(BaseCommannd):
          else:
             raise ClientExError
      
-     
+  def get_mfa_secret(self, session):
+      try:
+         response = self.client.associate_software_token(Session=session)
+      except ClientError as err: 
+         print(f"error.get mfa secret: {err.response['Error']['Code']}: {err.response['Error']['Message']}")        
+         if err.response['Error']['Code'] == 'NotAuthorizedException':
+            raise Unauthorized
+         elif err.response['Error']['Code'] == 'UserNotFoundException':
+            raise UserNotFoundError
+         elif err.response['Error']['Code'] == 'UserNotConfirmedException':
+            raise UserNotConfirmedError
+         elif err.response['Error']['Code'] == 'InvalidParameterException':
+            raise IncompleteParams
+         elif err.response['Error']['Code'] == 'InvalidParameterException':
+                raise ClientInvalidParameterError
+         else:
+            raise ClientExError   
+      else:
+         response.pop("ResponseMetadata", None)
+         return response   
       

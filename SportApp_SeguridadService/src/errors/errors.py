@@ -61,3 +61,7 @@ class PasswordResetRequiredError(ApiError):
 class LimitExceededError(ApiError):
     code = 412
     description = "Supero el limite de intentos. Intente mas tarde"
+
+class ExpiredCodeExceptionError(ApiError):
+    code = 401
+    description = "Your MFA code has expired or has been used already"
